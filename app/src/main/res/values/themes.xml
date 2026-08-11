@@ -1,0 +1,8 @@
+<resources>
+    <style name="Theme.RataAPK" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/rata_primary</item>
+        <item name="colorPrimaryDark">@color/rata_primary_dark</item>
+        <item name="colorAccent">@color/rata_accent</item>
+        <item name="android:windowBackground">@color/rata_background</item>
+    </style>
+</resources>

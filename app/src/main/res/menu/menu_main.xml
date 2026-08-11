@@ -1,0 +1,10 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_kelola_pin"
+        android:title="@string/main_menu_kelola_pin"
+        android:showAsAction="never" />
+    <item
+        android:id="@+id/menu_keluar"
+        android:title="@string/main_menu_keluar"
+        android:showAsAction="never" />
+</menu>

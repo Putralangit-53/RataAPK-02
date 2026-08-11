@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/rata_background">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarAdmin"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/rata_primary"
+        android:title="@string/admin_panel_title"
+        android:titleTextColor="@color/white" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:text="@string/admin_mode_badge"
+        android:textColor="@color/rata_accent"
+        android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/btnBukaAplikasi"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:text="@string/admin_buka_aplikasi"
+        android:backgroundTint="@color/rata_primary"
+        android:textColor="@color/white" />
+
+    <Button
+        android:id="@+id/btnPengaturanGitHub"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/admin_pengaturan_github"
+        android:backgroundTint="@color/rata_accent"
+        android:textColor="@color/rata_text_dark" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="16dp"
+        android:background="#DDDDDD" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:text="@string/admin_daftar_pin_title"
+        android:textStyle="bold"
+        android:textSize="16sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp">
+
+        <EditText
+            android:id="@+id/etPinBaru"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:inputType="number"
+            android:maxLength="8"
+            android:hint="@string/admin_pin_baru_hint" />
+
+        <Button
+            android:id="@+id/btnTambahPin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/admin_tambah_pin" />
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/lvPinPengguna"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_margin="16dp"
+        android:divider="#EEEEEE"
+        android:dividerHeight="1dp" />
+
+    <Button
+        android:id="@+id/btnKeluar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:text="@string/admin_keluar"
+        android:backgroundTint="@color/rata_error"
+        android:textColor="@color/white" />
+
+    <!-- Footer, tampil di semua halaman -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="14dp"
+        android:text="@string/app_footer"
+        android:textColor="@color/rata_text_dark"
+        android:textSize="11sp"
+        android:alpha="0.55"
+        android:gravity="center" />
+
+</LinearLayout>

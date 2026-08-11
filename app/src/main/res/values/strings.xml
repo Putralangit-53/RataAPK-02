@@ -1,0 +1,69 @@
+<resources>
+    <string name="app_name">RataAPK</string>
+
+    <!-- PinActivity -->
+    <string name="pin_title">Masukkan PIN</string>
+    <string name="pin_subtitle">Masukkan PIN untuk membuka aplikasi</string>
+    <string name="pin_hint">PIN</string>
+    <string name="pin_masuk">Masuk</string>
+    <string name="pin_salah">PIN salah. Coba lagi atau hubungi admin.</string>
+    <string name="pin_hubungi_admin">Lupa / belum punya PIN? Hubungi Admin</string>
+    <string name="pin_hubungi_admin_pesan">Halo Admin, saya butuh PIN baru untuk masuk aplikasi RataAPK.</string>
+    <string name="pin_nomor_admin">WhatsApp Admin: 0853-4652-7481</string>
+
+    <!-- AdminActivity -->
+    <string name="admin_panel_title">Panel Admin</string>
+    <string name="admin_mode_badge">Mode Admin</string>
+    <string name="admin_daftar_pin_title">Daftar PIN Pengguna</string>
+    <string name="admin_pin_baru_hint">PIN pengguna baru (4\u20138 digit)</string>
+    <string name="admin_tambah_pin">Tambah PIN</string>
+    <string name="admin_pin_kosong">Belum ada PIN pengguna. Tambahkan di atas.</string>
+    <string name="admin_hapus_pin_judul">Hapus PIN?</string>
+    <string name="admin_hapus_pin_pesan">Pengguna dengan PIN %1$s tidak akan bisa masuk lagi.</string>
+    <string name="admin_hapus_ya">Hapus</string>
+    <string name="admin_batal">Batal</string>
+    <string name="admin_pin_sudah_ada">PIN tersebut sudah terdaftar.</string>
+    <string name="admin_pin_invalid">PIN harus 4\u20138 digit angka.</string>
+    <string name="admin_pin_tidak_boleh_sama_admin">PIN pengguna tidak boleh sama dengan PIN admin.</string>
+    <string name="admin_buka_aplikasi">Buka Aplikasi (Mode Admin)</string>
+    <string name="admin_pengaturan_github">\u2699\ufe0f Pengaturan GitHub (Build Otomatis)</string>
+    <string name="admin_keluar">Keluar</string>
+
+    <!-- MainActivity -->
+    <string name="main_menu_kelola_pin">Kelola PIN Pengguna</string>
+    <string name="main_menu_keluar">Keluar / Ganti PIN</string>
+
+    <!-- SettingsActivity (Pengaturan GitHub untuk Build Otomatis) -->
+    <string name="settings_judul">Pengaturan GitHub</string>
+    <string name="settings_penjelasan">Isi data repo GitHub yang menyimpan workflow build-apps.yml. Token disimpan hanya di HP ini (tidak dikirim ke server RataAPK). Pakai Fine-grained Personal Access Token yang dibatasi ke satu repo ini saja, dengan izin \u201cContents: Read &amp; write\u201d dan \u201cActions: Read &amp; write\u201d.</string>
+    <string name="settings_label_owner">Pemilik repo (username/organisasi)</string>
+    <string name="settings_hint_owner">contoh: yusup-dev</string>
+    <string name="settings_label_repo">Nama repo</string>
+    <string name="settings_hint_repo">contoh: RataAPK-Android-Ios</string>
+    <string name="settings_label_token">Personal Access Token</string>
+    <string name="settings_hint_token">ghp_xxxxxxxxxxxxxxxxxxxx</string>
+    <string name="settings_label_branch">Branch</string>
+    <string name="settings_hint_branch">main</string>
+    <string name="settings_label_workflow">Nama file workflow</string>
+    <string name="settings_hint_workflow">build-apps.yml</string>
+    <string name="settings_label_app_label">Nama aplikasi default</string>
+    <string name="settings_hint_app_label">RataAPK</string>
+    <string name="settings_label_package_name">Package name default</string>
+    <string name="settings_hint_package_name">id.rataapk.template</string>
+    <string name="settings_simpan">Simpan Pengaturan</string>
+    <string name="settings_hapus_token">Hapus Token dari HP Ini</string>
+    <string name="settings_token_dihapus">Token dihapus dari HP ini</string>
+    <string name="settings_wajib_diisi">Pemilik repo, nama repo, dan token wajib diisi</string>
+    <string name="settings_tersimpan">Pengaturan tersimpan</string>
+
+    <!-- BuildProgressActivity -->
+    <string name="build_progress_judul">Build Otomatis</string>
+    <string name="build_progress_memulai">Memulai\u2026</string>
+    <string name="build_progress_sukses">Build berhasil \u2014 siap dipasang</string>
+    <string name="build_progress_gagal">Build gagal</string>
+    <string name="build_progress_tutup">Tutup</string>
+    <string name="build_progress_pasang_apk">Pasang APK</string>
+
+    <!-- Footer, tampil di semua halaman -->
+    <string name="app_footer">@By Yusup -Putra Langit Technology 2026</string>
+</resources>

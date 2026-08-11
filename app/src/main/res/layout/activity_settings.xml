@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/rata_background">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbarSettings"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/rata_primary"
+            android:titleTextColor="@color/white" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_penjelasan"
+                android:textSize="13sp"
+                android:textColor="@color/rata_text_dark"
+                android:lineSpacingExtra="3dp"
+                android:layout_marginBottom="20dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_label_owner"
+                android:textStyle="bold"
+                android:textSize="12.5sp" />
+            <EditText
+                android:id="@+id/etOwner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/settings_hint_owner"
+                android:inputType="text"
+                android:autofillHints="" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:text="@string/settings_label_repo"
+                android:textStyle="bold"
+                android:textSize="12.5sp" />
+            <EditText
+                android:id="@+id/etRepo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/settings_hint_repo"
+                android:inputType="text"
+                android:autofillHints="" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:text="@string/settings_label_token"
+                android:textStyle="bold"
+                android:textSize="12.5sp" />
+            <EditText
+                android:id="@+id/etToken"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/settings_hint_token"
+                android:inputType="textPassword"
+                android:autofillHints="" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:text="@string/settings_label_branch"
+                android:textStyle="bold"
+                android:textSize="12.5sp" />
+            <EditText
+                android:id="@+id/etBranch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/settings_hint_branch"
+                android:inputType="text"
+                android:autofillHints="" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:text="@string/settings_label_workflow"
+                android:textStyle="bold"
+                android:textSize="12.5sp" />
+            <EditText
+                android:id="@+id/etWorkflowFile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/settings_hint_workflow"
+                android:inputType="text"
+                android:autofillHints="" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:text="@string/settings_label_app_label"
+                android:textStyle="bold"
+                android:textSize="12.5sp" />
+            <EditText
+                android:id="@+id/etAppLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/settings_hint_app_label"
+                android:inputType="text"
+                android:autofillHints="" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:text="@string/settings_label_package_name"
+                android:textStyle="bold"
+                android:textSize="12.5sp" />
+            <EditText
+                android:id="@+id/etPackageName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/settings_hint_package_name"
+                android:inputType="text"
+                android:autofillHints="" />
+
+            <Button
+                android:id="@+id/btnSimpanSettings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="22dp"
+                android:text="@string/settings_simpan"
+                android:backgroundTint="@color/rata_primary"
+                android:textColor="@color/white" />
+
+            <Button
+                android:id="@+id/btnHapusToken"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@string/settings_hapus_token"
+                android:backgroundTint="@color/rata_error"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/app_footer"
+                android:textColor="@color/rata_text_dark"
+                android:textSize="11sp"
+                android:alpha="0.55"
+                android:gravity="center" />
+
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

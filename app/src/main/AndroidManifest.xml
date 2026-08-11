@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!--
+      Wajib sejak Android 8 (API 26) untuk memasang APK dari luar Play
+      Store (dipakai BuildProgressActivity setelah build otomatis selesai).
+      Pengguna tetap harus menyetujuinya manual lewat Pengaturan sistem,
+      permission ini cuma membuka pintu untuk meminta persetujuan itu.
+    -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:label="@string/app_name"
+        android:theme="@style/Theme.RataAPK"
+        android:usesCleartextTraffic="true">
+
+        <!-- Layar PIN selalu jadi pintu masuk pertama aplikasi -->
+        <activity
+            android:name=".PinActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Panel khusus admin: kelola PIN pengguna -->
+        <activity
+            android:name=".AdminActivity"
+            android:exported="false"
+            android:label="@string/admin_panel_title" />
+
+        <!-- WebView utama, dibuka setelah PIN benar (admin ataupun pengguna) -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="false"
+            android:label="@string/app_name" />
+
+        <!-- Pengaturan repo GitHub untuk alur Build Otomatis (khusus admin) -->
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false"
+            android:label="@string/settings_judul" />
+
+        <!-- Progress & hasil alur Build Otomatis -->
+        <activity
+            android:name=".BuildProgressActivity"
+            android:exported="false"
+            android:label="@string/build_progress_judul" />
+
+        <!--
+          FileProvider: dibutuhkan supaya kartu "Konversi" di dashboard bisa
+          benar-benar memilih file (zip/html project) dari penyimpanan HP lalu
+          membagikannya (share) ke Admin/WhatsApp/Drive/GitHub app, tanpa ini
+          Android akan menolak berbagi file lewat content:// URI (wajib sejak
+          API 24) dan tombol "Bagikan" akan crash. Juga dipakai
+          BuildProgressActivity untuk membuka installer APK hasil build
+          otomatis.
+        -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+    </application>
+</manifest>

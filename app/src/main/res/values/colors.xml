@@ -1,0 +1,11 @@
+<resources>
+    <!-- Warna resmi diambil langsung dari logo RataAPK -->
+    <color name="rata_primary">#062E5E</color>
+    <color name="rata_primary_dark">#041D3D</color>
+    <color name="rata_accent">#FEA801</color>
+    <color name="rata_background">#F5F6FA</color>
+    <color name="rata_text_dark">#212121</color>
+    <color name="rata_error">#D32F2F</color>
+    <color name="white">#FFFFFF</color>
+    <color name="ic_launcher_background">#FFFFFF</color>
+</resources>
