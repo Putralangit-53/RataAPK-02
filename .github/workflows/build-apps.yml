@@ -1,0 +1,366 @@
+name: Build RataAPK (Android & iOS)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      app_label:
+        description: "Nama aplikasi"
+        required: false
+        default: "RataAPK"
+      package_name:
+        description: "Package name / Bundle ID (contoh: com.contoh.app)"
+        required: false
+        default: "id.rataapk.template"
+      version_name:
+        description: "Version name (1.0.0)"
+        required: false
+        default: "1.0.0"
+      version_code:
+        description: "Version code / build number (angka)"
+        required: false
+        default: "1"
+      config_json:
+        description: "Isi rataapk-config.json (JSON, sudah di-base64) - opsional"
+        required: false
+        default: ""
+      build_type:
+        description: "Jenis build Android"
+        required: false
+        default: "debug"
+        type: choice
+        options: [debug, release]
+      build_android:
+        description: "Build aplikasi Android?"
+        required: false
+        default: true
+        type: boolean
+      build_ios:
+        description: "Build aplikasi iOS?"
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  # ======================================================================
+  # ANDROID — hasil akhir: file .apk yang bisa langsung diinstal di HP
+  # Android (aktifkan "Izinkan dari sumber ini" saat memasang APK di luar
+  # Play Store).
+  # ======================================================================
+  build-android:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.build_android }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install SDK Platform & Build-Tools yang dibutuhkan
+        run: |
+          yes | sdkmanager --licenses > /dev/null || true
+          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+
+      - name: Terapkan package name & versi (build.gradle)
+        run: |
+          python3 - << 'PYEOF'
+          import re
+
+          # Fallback aman: kalau input dari dashboard/manual trigger kosong,
+          # JANGAN biarkan namespace/applicationId/versi jadi kosong —
+          # itu yang bikin "manifest:package attribute is not declared".
+          package_name = "${{ inputs.package_name }}".strip() or "id.rataapk.template"
+          version_name = "${{ inputs.version_name }}".strip() or "1.0.0"
+          version_code = "${{ inputs.version_code }}".strip() or "1"
+
+          if not re.fullmatch(r"[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)+", package_name):
+              raise SystemExit(
+                  f"package_name tidak valid: '{package_name}'. "
+                  "Harus format seperti com.contoh.app (huruf/angka/underscore, dipisah titik)."
+              )
+          if not version_code.isdigit():
+              raise SystemExit(f"version_code harus angka, dapat: '{version_code}'")
+
+          path = "app/build.gradle"
+          with open(path) as f:
+              content = f.read()
+          content = re.sub(r"namespace '.*?'", f"namespace '{package_name}'", content)
+          content = re.sub(r'applicationId ".*?"', f'applicationId "{package_name}"', content)
+          content = re.sub(r"versionCode \d+", f"versionCode {version_code}", content)
+          content = re.sub(r'versionName ".*?"', f'versionName "{version_name}"', content)
+          with open(path, "w") as f:
+              f.write(content)
+          print(f"build.gradle diperbarui -> namespace/applicationId={package_name}, versionName={version_name}, versionCode={version_code}")
+          PYEOF
+
+      - name: Terapkan nama aplikasi (strings.xml)
+        run: |
+          python3 - << 'PYEOF'
+          import re
+
+          app_label = "${{ inputs.app_label }}".strip() or "RataAPK"
+
+          path = "app/src/main/res/values/strings.xml"
+          with open(path) as f:
+              content = f.read()
+          content = re.sub(
+              r'<string name="app_name">.*?</string>',
+              f'<string name="app_name">{app_label}</string>',
+              content,
+          )
+          with open(path, "w") as f:
+              f.write(content)
+          print(f"strings.xml diperbarui -> app_name={app_label}")
+          PYEOF
+
+      - name: Masukkan website yang diupload (incoming/website.zip)
+        if: hashFiles('incoming/website.zip') != ''
+        run: |
+          rm -rf app/src/main/assets/www
+          mkdir -p app/src/main/assets/www
+          unzip -o incoming/website.zip -d app/src/main/assets/www
+          echo "Website project diekstrak ke assets/www/"
+
+      - name: Tulis rataapk-config.json
+        if: inputs.config_json != ''
+        run: |
+          echo "${{ inputs.config_json }}" | base64 -d > app/src/main/assets/www/rataapk-config.json
+          cat app/src/main/assets/www/rataapk-config.json
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: "8.7"
+
+      - name: Build APK
+        run: |
+          if [ "${{ inputs.build_type }}" = "release" ]; then
+            gradle assembleRelease --no-daemon
+          else
+            gradle assembleDebug --no-daemon
+          fi
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk-result
+          path: app/build/outputs/apk/**/*.apk
+          retention-days: 30
+
+  # ======================================================================
+  # iOS — tanpa sertifikat Apple Developer, hasilnya adalah build untuk
+  # iOS SIMULATOR saja (untuk verifikasi aplikasi berhasil dibangun,
+  # dijalankan di Simulator lewat Xcode di Mac — TIDAK bisa dipasang di
+  # iPhone/iPad fisik).
+  #
+  # Untuk hasil .ipa yang BISA diinstal ke iPhone/iPad asli, tambahkan
+  # Secrets berikut di Settings > Secrets and variables > Actions:
+  #   IOS_P12_BASE64                  (sertifikat .p12, sudah di-base64)
+  #   IOS_P12_PASSWORD                (password file .p12 di atas)
+  #   IOS_PROVISIONING_PROFILE_BASE64 (file .mobileprovision, di-base64)
+  #   IOS_TEAM_ID                     (Team ID dari Apple Developer Program)
+  # Keempatnya wajib berasal dari akun Apple Developer Program (berbayar,
+  # USD 99/tahun) milik Anda sendiri — RataAPK tidak menyediakan sertifikat
+  # siapa pun.
+  # ======================================================================
+  build-ios:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.build_ios }}
+    runs-on: macos-26
+    defaults:
+      run:
+        working-directory: ios
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Pilih Xcode terbaru yang tersedia di runner
+        run: |
+          echo "=== Versi Xcode yang terpasang di image ini ==="
+          ls -d /Applications/Xcode*.app 2>/dev/null
+          XCODE_TERBARU=$(ls -d /Applications/Xcode_*.app 2>/dev/null | sort -V | tail -n 1)
+          if [ -z "$XCODE_TERBARU" ]; then
+            XCODE_TERBARU="/Applications/Xcode.app"
+          fi
+          echo "Memilih: $XCODE_TERBARU"
+          sudo xcode-select -s "$XCODE_TERBARU"
+          xcodebuild -version
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Terapkan bundle id, versi & nama aplikasi (project.yml)
+        run: |
+          python3 - << 'PYEOF'
+          import re
+
+          bundle_id = "${{ inputs.package_name }}".strip() or "id.rataapk.template"
+          version_name = "${{ inputs.version_name }}".strip() or "1.0.0"
+          version_code = "${{ inputs.version_code }}".strip() or "1"
+          app_label = "${{ inputs.app_label }}".strip() or "RataAPK"
+
+          if not re.fullmatch(r"[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)+", bundle_id):
+              raise SystemExit(f"package_name tidak valid untuk Bundle ID iOS: '{bundle_id}'")
+          if not version_code.isdigit():
+              raise SystemExit(f"version_code harus angka, dapat: '{version_code}'")
+
+          path = "project.yml"
+          with open(path) as f:
+              content = f.read()
+          content = content.replace(
+              'PRODUCT_BUNDLE_IDENTIFIER: id.rataapk.template',
+              f'PRODUCT_BUNDLE_IDENTIFIER: {bundle_id}',
+          )
+          content = content.replace('MARKETING_VERSION: "1.0.0"', f'MARKETING_VERSION: "{version_name}"')
+          content = content.replace('CURRENT_PROJECT_VERSION: "1"', f'CURRENT_PROJECT_VERSION: "{version_code}"')
+          content = content.replace(
+              'CFBundleShortVersionString: "1.0.0"',
+              f'CFBundleShortVersionString: "{version_name}"',
+          )
+          content = content.replace('CFBundleVersion: "1"', f'CFBundleVersion: "{version_code}"')
+          content = content.replace(
+              'CFBundleDisplayName: RataAPK',
+              f'CFBundleDisplayName: {app_label}',
+          )
+          with open(path, "w") as f:
+              f.write(content)
+          print(f"project.yml diperbarui -> bundle id={bundle_id}, versi={version_name} ({version_code}), label={app_label}")
+          PYEOF
+
+      - name: Masukkan website yang diupload (incoming/website.zip)
+        if: hashFiles('incoming/website.zip') != ''
+        working-directory: .
+        run: |
+          rm -rf ios/RataAPK/www
+          mkdir -p ios/RataAPK/www
+          unzip -o incoming/website.zip -d ios/RataAPK/www
+          echo "Website project diekstrak ke ios/RataAPK/www/"
+
+      - name: Generate proyek Xcode (XcodeGen)
+        run: |
+          xcodegen version
+          xcodegen generate
+          echo "=== Isi ios/ setelah generate ==="
+          ls -la
+          echo "=== Daftar scheme yang tersedia ==="
+          xcodebuild -list -project RataAPK.xcodeproj
+
+      - name: Cek apakah kredensial signing Apple Developer tersedia
+        id: signing
+        env:
+          P12_BASE64: ${{ secrets.IOS_P12_BASE64 }}
+          PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
+        run: |
+          if [ -n "$P12_BASE64" ] && [ -n "$PROFILE_BASE64" ]; then
+            echo "tersedia=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "tersedia=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # ---------- Jalur A: tanpa sertifikat -> build Simulator ----------
+      - name: "Build untuk iOS Simulator (tanpa sertifikat)"
+        if: steps.signing.outputs.tersedia == 'false'
+        run: |
+          set -o pipefail
+          xcodebuild -project RataAPK.xcodeproj -scheme RataAPK \
+            -configuration Release \
+            -sdk iphonesimulator \
+            -destination "generic/platform=iOS Simulator" \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            build 2>&1 | tee xcodebuild-simulator.log
+          echo "=== Isi folder hasil build (untuk verifikasi) ==="
+          find build/Build/Products -maxdepth 2
+
+      - name: Kemas build Simulator (.app) jadi .zip
+        if: steps.signing.outputs.tersedia == 'false'
+        run: |
+          cd build/Build/Products/Release-iphonesimulator
+          zip -r RataAPK-simulator.zip RataAPK.app
+
+      - name: Upload build Simulator
+        if: steps.signing.outputs.tersedia == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-simulator-build
+          path: ios/build/Build/Products/Release-iphonesimulator/RataAPK-simulator.zip
+          retention-days: 30
+
+      - name: Upload log build (selalu, walau gagal)
+        if: always() && steps.signing.outputs.tersedia == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build-log
+          path: ios/xcodebuild-simulator.log
+          retention-days: 14
+          if-no-files-found: ignore
+
+      # ---------- Jalur B: dengan sertifikat -> .ipa siap install ----------
+      - name: Import sertifikat & provisioning profile
+        if: steps.signing.outputs.tersedia == 'true'
+        env:
+          P12_BASE64: ${{ secrets.IOS_P12_BASE64 }}
+          P12_PASSWORD: ${{ secrets.IOS_P12_PASSWORD }}
+          PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
+        run: |
+          KEYCHAIN_PATH="$RUNNER_TEMP/rataapk-signing.keychain-db"
+          KEYCHAIN_PASSWORD=$(uuidgen)
+
+          echo "$P12_BASE64" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          echo "$PROFILE_BASE64" | base64 --decode > "$RUNNER_TEMP/profile.mobileprovision"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$RUNNER_TEMP/cert.p12" -k "$KEYCHAIN_PATH" -P "$P12_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH" $(security list-keychains -d user | sed 's/"//g')
+
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp "$RUNNER_TEMP/profile.mobileprovision" ~/Library/MobileDevice/Provisioning\ Profiles/
+
+      - name: Build & archive .ipa (signed)
+        if: steps.signing.outputs.tersedia == 'true'
+        env:
+          TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
+        run: |
+          xcodebuild -project RataAPK.xcodeproj -scheme RataAPK \
+            -configuration Release -sdk iphoneos \
+            -archivePath build/RataAPK.xcarchive \
+            DEVELOPMENT_TEAM="$TEAM_ID" \
+            archive
+
+          cat > ExportOptions.plist << 'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>ad-hoc</string>
+              <key>compileBitcode</key>
+              <false/>
+              <key>signingStyle</key>
+              <string>automatic</string>
+          </dict>
+          </plist>
+          PLIST
+
+          xcodebuild -exportArchive \
+            -archivePath build/RataAPK.xcarchive \
+            -exportOptionsPlist ExportOptions.plist \
+            -exportPath build/ipa
+
+      - name: Upload .ipa
+        if: steps.signing.outputs.tersedia == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-ipa-result
+          path: ios/build/ipa/*.ipa
+          retention-days: 30
